@@ -1,0 +1,590 @@
+%%%%%%%%%%%%%2. データベースの導入%%%%%%%%%%%
+
+#ターミナル
+npm install mysql   //mySQLのインストール
+
+#App.js
+const express = require('express');
+// MySQLを使うためのコードを貼り付けてください
+const mysql = require('mysql');
+
+const app = express();
+
+app.use(express.static('public'));
+// 定数connectionを定義して接続情報の書かれたコードを代入してください
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  res.render('index.ejs');
+});
+
+app.listen(3000);
+
+
+%%%%%%%%%%%%%%%%%% 3. データベースの利用%%%%%%%%%%%%%%%%%%%
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  // データベースからデータを取得する処理を書いてください
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      console.log(results);
+      res.render('index.ejs');
+    }
+  );
+});
+
+app.listen(3000);
+
+
+%%%%%%%%%%%%%%%%%% 4. 取得した値の表示 %%%%%%%%%%%%%%%%%%%%%%
+
+############app.js##############
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      // res.renderの第２引数にオブジェクトを追加してください
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.listen(3000);
+
+#################index.ejs#################
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト</h1>
+      </div>
+      <div class="index-table-wrapper">
+        <div class="table-head">
+          <span class="id-column">ID</span>
+          <span>買うもの</span>
+        </div>
+        <!-- itemsを削除してください -->
+        <!-- ここまで削除してください -->
+        <ul class="table-body">
+          <% items.forEach((item) => { %>
+            <li>
+              <div class="item-data">
+                <span class="id-column"><%= item.id %></span>
+                <span class="name-column"><%= item.name %></span>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+%%%%%%%%%%%%%%%%%% 5. リスト作成画面の作成 %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+// 作成画面を表示するルーティングを作成してください
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+})
+
+app.listen(3000);
+
+########### index.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト</h1>
+        <!-- 作成画面へのリンクを追加してください -->
+        <a href="/new" class="new-button">+ 新規作成</a>      
+      </div>
+      <div class="index-table-wrapper">
+        <div class="table-head">
+          <span class="id-column">ID</span>
+          <span>買うもの</span>
+        </div>
+        <ul class="table-body">
+          <% items.forEach((item) => { %>
+            <li>
+              <div class="item-data">
+                <span class="id-column"><%= item.id %></span>
+                <span class="name-column"><%= item.name %></span>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+
+########### new.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト作成</h1>
+      </div>
+      <div class="item-form-wrapper">
+        <p class="form-label">買うもの</p>
+        <input type="text">
+        <input type="submit" value="作成する">
+      </div>
+      <a href="/index" class="cancel-button">もどる</a>
+    </div>
+  </body>
+</html>
+
+
+%%%%%%%%%%%%%%%%%% 6. フォームを使ったリクエスト %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+});
+
+// メモを追加するルーティングを作成してください
+app.post('/create', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.listen(3000);
+
+########### index.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト</h1>
+        <a href="/new" class="new-button">+ 新規作成</a>
+      </div>
+      <div class="index-table-wrapper">
+        <div class="table-head">
+          <span class="id-column">ID</span>
+          <span>買うもの</span>
+        </div>
+        <ul class="table-body">
+          <% items.forEach((item) => { %>
+            <li>
+              <div class="item-data">
+                <span class="id-column"><%= item.id %></span>
+                <span class="name-column"><%= item.name %></span>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+
+########### new.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト作成</h1>
+      </div>
+      <div class="item-form-wrapper">
+        <p class="form-label">買うもの</p>
+        <!-- formタグを追加してください -->
+        <form action="/create" method="post">
+          <input type="text">
+          <input type="submit" value="作成する">
+        <!-- formタグの閉じタグを書いてください -->
+        </form>        
+      </div>
+      <a href="/index" class="cancel-button">もどる</a>
+    </div>
+  </body>
+</html>
+
+
+%%%%%%%%%%%%%%%%%% 7. フォームの値の受け取り %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+// フォームから送信された値を受け取れるようにしてください
+app.use(express.urlencoded({extended: false}));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+});
+
+app.post('/create', (req, res) => {
+  // フォームから送信された値を出力してください
+  console.log(req.body.itemName);
+  
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.listen(3000);
+
+########### index.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト</h1>
+        <a href="/new" class="new-button">+ 新規作成</a>
+      </div>
+      <div class="index-table-wrapper">
+        <div class="table-head">
+          <span class="id-column">ID</span>
+          <span>買うもの</span>
+        </div>
+        <ul class="table-body">
+          <% items.forEach((item) => { %>
+            <li>
+              <div class="item-data">
+                <span class="id-column"><%= item.id %></span>
+                <span class="name-column"><%= item.name %></span>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+
+########### new.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト作成</h1>
+      </div>
+      <div class="item-form-wrapper">
+        <p class="form-label">買うもの</p>
+        <form action="/create" method="post">
+          <!-- name属性を追加してください -->
+          <input  type="text" name="itemName">
+          <input type="submit" value="作成する">
+        </form>
+      </div>
+      <a href="/index" class="cancel-button">もどる</a>
+    </div>
+  </body>
+</html>
+
+
+%%%%%%%%%%%%%%%%%% 8. データベースへの追加 %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+app.use(express.urlencoded({extended: false}));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+});
+
+app.post('/create', (req, res) => {
+  // データベースに追加する処理を書いてください
+  connection.query(
+    'INSERT INTO items (name) VALUES (?)',
+    [req.body.itemName],
+    (error, results) => {
+      connection.query(
+        'SELECT * FROM items',
+        (error, results) => {
+          res.render('index.ejs', {items: results});
+        }
+      );
+    }
+  );
+  // 以下の一覧画面表示の処理を削除してください
+  // ここまで削除してください
+});
+
+app.listen(3000);
+
+
+%%%%%%%%%%%%%%%%%% 9. リダイレクトの活用 %%%%%%%%%%%%%%%%%%%%%%
+res.redirect('url');
+urlを指定してリダイレクトする
+postメソッドでリクエストした際によく用いる（余分な操作を実行させないため）
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+app.use(express.urlencoded({extended: false}));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+});
+
+app.post('/create', (req, res) => {
+  connection.query(
+    'INSERT INTO items (name) VALUES (?)',
+    [req.body.itemName],
+    (error, results) => {
+      // 下記のコードを削除してください
+      // ここまで削除してください
+      // 一覧画面にリダイレクトしてください
+      res.redirect('/index');
+      
+    }
+  );
+});
+
+app.listen(3000);

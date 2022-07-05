@@ -1,0 +1,249 @@
+%%%%%%%%%%%%%%%%%% 2. 削除ボタンの準備 %%%%%%%%%%%%%%%%%%%%%%
+
+データベースを変更する処理は、app.postを用いる。
+削除は'/delete'
+
+########### app.js #############
+
+const express = require('express');
+const mysql = require('mysql');
+const app = express();
+
+app.use(express.static('public'));
+app.use(express.urlencoded({extended: false}));
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'progate',
+  password: 'password',
+  database: 'list_app'
+});
+
+app.get('/', (req, res) => {
+  res.render('top.ejs');
+});
+
+app.get('/index', (req, res) => {
+  connection.query(
+    'SELECT * FROM items',
+    (error, results) => {
+      res.render('index.ejs', {items: results});
+    }
+  );
+});
+
+app.get('/new', (req, res) => {
+  res.render('new.ejs');
+});
+
+app.post('/create', (req, res) => {
+  connection.query(
+    'INSERT INTO items (name) VALUES (?)',
+    [req.body.itemName],
+    (error, results) => {
+      res.redirect('/index');
+    }
+  );
+});
+
+// メモを削除するルーティングを作成してください
+app.post('delete', (req, res) => {
+    // メモを削除する処理
+
+    // リダイレクト
+    res.redirect('/index');
+});
+app.listen(3000);
+
+########### index.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト</h1>
+        <a href="/new" class="new-button">+ 新規登録</a>
+      </div>
+      <div class="index-table-wrapper">
+        <div class="table-head">
+          <span class="id-column">ID</span>
+          <span>買うもの</span>
+        </div>
+        <ul class="table-body">
+          <% items.forEach((item) => { %>
+            <li>
+              <div class="item-data">
+                <span class="id-column"><%= item.id %></span>
+                <span class="name-column"><%= item.name %></span>
+              </div>
+              <div class="item-menu">
+                <!-- formタグを追加してください -->
+                <form action="/delete" method="post">
+                    <input type="submit" value="削除">
+                </form>
+                
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+%%%%%%%%%%%%%%%%%% 3. 削除するidの受け渡し %%%%%%%%%%%%%%%%%%%%%%
+
+idの受け渡しにはURLを使用する
+/delete/:id　例：/delete/3 など　この3のことをルートパラメータと呼ぶ
+form内での使い方
+
+index.ejs
+<form action="/delete/<%= item.id %>" method="post">
+
+app.js
+japp.post('/delete/:id', (req, res) => {
+  console.log(req.params.id) //ルートパラメータで受け取った値の出力
+  res.redirect('/index')
+})
+
+########### app.js #############
+
+// ルーティングにルートパラメータを指定してください
+app.post('/delete/:id', (req, res) => {
+  // ルートパラメータで受け取った値を出力してください
+  console.log(req.params.id)
+  
+  res.redirect('/index');
+});
+
+
+########### index.ejs #############
+
+<form action="/delete/<%=item.id%>" method="post">
+
+
+%%%%%%%%%%%%%%%%%% 4. DELETEクエリの実行 %%%%%%%%%%%%%%%%%%%%%%
+
+DELETE FROM items WHERE id = ?,
+[req.params.id] この[]内の値が?に入力される
+
+########### app.js #############
+
+app.post('/delete/:id', (req, res) => {
+  // データベースのデータを削除する処理を書いてください
+  connection.query(
+    'DELETE FROM items WHERE id = ?',
+    [req.params.id],
+    (error, results) => {
+      res.redirect('/index');
+    }
+  )
+});
+
+%%%%%%%%%%%%%%%%%% 5. メモ更新の準備 %%%%%%%%%%%%%%%%%%%%%%
+
+app.get('/edit/:id') 編集画面の表示(自分でedit.ejsというファイルを作成しているから)
+
+########### app.js #############
+
+app.get('/edit/:id', (req, res) => {
+  res.render('edit.ejs');
+});
+
+########### index.ejs #############
+
+<!-- メモのidを含めた編集画面へのリンクを作成してください -->
+<a href="/edit/<%=item.id%>">編集</a>
+
+########### edit.ejs #############
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LIST APP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/send_url.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="header-logo">LIST APP</a>
+    </header>
+    <div class="container">
+      <div class="container-header">
+        <h1>買い物リスト編集</h1>
+        <a href="/index" class="cancel-button">キャンセル</a>
+      </div>
+      <div class="item-form-wrapper">
+        <p class="form-label">買うもの</p>
+        <form>
+          <input type="text">
+          <input type="submit" value="更新する">
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+%%%%%%%%%%%%%%%%%% 6. 選択されたメモの表示 %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+app.get('/edit/:id', (req, res) => {
+  // 選択されたメモをデータベースから取得する処理を書いてください
+  connection.query(
+    'SELECT * FROM items WHERE id=?',
+    [req.params.id],
+    (error, results) => {
+      res.render('edit.ejs', {item: results[0]});
+    })
+});
+
+########### edit.ejs #############
+
+<!-- value属性を指定してください -->
+<input type="text" value="<%=item.name%>">
+
+%%%%%%%%%%%%%%%%%% 7. 更新のルーティング %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+
+// メモを更新するルーティングを作成してください
+app.post('/update/:id', (req, res) => {
+  res.redirect('/index');
+});
+
+########### edit.ejs #############
+
+<!-- フォームの送信先とメソッドを指定してください -->
+<form action="/update/<%=item.id%>" method="post">
+  <!-- name属性を指定してください -->
+  <input name="itemName" type="text" value="<%= item.name %>">
+  <input type="submit" value="更新する">
+</form>
+
+%%%%%%%%%%%%%%%%%% 8. 選択されたメモの更新 %%%%%%%%%%%%%%%%%%%%%%
+
+########### app.js #############
+app.post('/update/:id', (req, res) => {
+  // 選択されたメモを更新する処理を書いてください
+  connection.query(
+    'UPDATE items SET name = ? WHERE id = ?',
+    [req.body.itemName, req.params.id],
+    (error, results) => {
+      res.redirect('/index');
+    })
+  // 以下の一覧画面へリダイレクトする処理を削除してください
+});
+

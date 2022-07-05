@@ -1,0 +1,64 @@
+// 2. Expressの導入
+#コンソール
+npm install express;
+
+#エディタ（App.js）
+const express = require('express');
+const app = express();
+
+
+// 3. サーバーの起動
+
+#エディタ
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.render('hello.ejs');
+});
+app.listen(3000);
+
+#コンソール
+node app.js
+
+
+// 4. ページの表示の仕組み
+
+#エディタ
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.render('hello.ejs');
+});
+
+// トップ画面を表示するルーティングを作成してください
+app.get('/top', (req, res) => {
+    res.render('top.ejs');
+})
+
+app.listen(3000);
+
+
+// 5. CSSの運用と画像の表示
+
+#app.js
+const express = require('express');
+const app = express();
+
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+    res.render('hello.ejs');
+});
+
+app.get('/top', (req, res) => {
+    res.render('top.ejs');
+});
+app.listen(3000);
+
+//6. 一覧画面の作成
+app.get('/index', (req, res) => {
+    res.render('index.ejs');
+})
+
